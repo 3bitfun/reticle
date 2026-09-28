@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <title>Reticle — Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="settings.css" />
+</head>
+<body>
+
+  <header class="titlebar">
+    <div class="titlebar-brand">
+      <div class="brand-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="7"></circle>
+          <line x1="12" y1="1" x2="12" y2="5"></line>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="1" y1="12" x2="5" y2="12"></line>
+          <line x1="19" y1="12" x2="23" y2="12"></line>
+        </svg>
+      </div>
+      <div class="brand-copy">
+        <h1>RETICLE</h1>
+        <p>Crosshair Studio</p>
+      </div>
+    </div>
+
+    <div class="titlebar-drag"></div>
+
+    <div class="titlebar-actions">
+      <button class="theme-toggle" id="themeToggle" title="Toggle theme" type="button">
+        <span class="theme-icon theme-icon-dark">☾</span>
+        <span class="theme-icon theme-icon-light">☀</span>
+      </button>
+      <button class="win-btn" id="btn-min" title="Minimize" type="button">
+        <svg width="12" height="12" viewBox="0 0 12 12"><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </button>
+      <button class="win-btn" id="btn-close" title="Close" type="button">
+        <svg width="12" height="12" viewBox="0 0 12 12"><line x1="3" y1="3" x2="9" y2="9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="9" y1="3" x2="3" y2="9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="app">
+    <aside class="sidebar">
+      <nav class="tabs">
+        <button class="tab active" data-tab="home" type="button">
+          <span class="tab-icon">⌂</span><span class="tab-label">Home</span>
+        </button>
+        <button class="tab" data-tab="shape" type="button">
+          <span class="tab-icon">◇</span><span class="tab-label">Shape</span>
+        </button>
+        <button class="tab" data-tab="pixel" type="button">
+          <span class="tab-icon">▦</span><span class="tab-label">Pixel</span>
+        </button>
+        <button class="tab" data-tab="presets" type="button">
+          <span class="tab-icon">★</span><span class="tab-label">Presets</span>
+        </button>
+        <button class="tab" data-tab="appearance" type="button">
+          <span class="tab-icon">◐</span><span class="tab-label">Appearance</span>
+        </button>
+        <button class="tab" data-tab="behavior" type="button">
+          <span class="tab-icon">⌁</span><span class="tab-label">Behavior</span>
+        </button>
+        <button class="tab" data-tab="ammo" type="button">
+          <span class="tab-icon">⊙</span><span class="tab-label">Ammo</span>
+        </button>
+        <button class="tab" data-tab="hotkeys" type="button">
+          <span class="tab-icon">⌘</span><span class="tab-label">Hotkeys</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="status-chip">
+          <span class="status-dot"></span>
+          <span>Overlay-ready</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="content">
+
+      <!-- HOME -->
+      <section class="tab-panel active" data-panel="home">
+        <header class="panel-header">
+          <div>
+            <h2>Welcome back</h2>
+            <p>Your crosshair at a glance. Adjust anything from the tabs on the left.</p>
+          </div>
+          <span class="section-note" id="homeStatus">Live</span>
+        </header>
+
+        <div class="home-grid">
+          <div class="card home-preview-card">
+            <div class="section-title">
+              <span>Preview</span>
+              <span class="section-note" id="homePresetName">—</span>
+            </div>
+
+            <div class="preview-stage">
+              <div class="preview-grid"></div>
+              <div class="preview-cross"><canvas id="homePreviewCanvas"></canvas></div>
+              <div class="preview-vignette"></div>
+            </div>
+
+            <div class="preview-actions">
+              <button class="btn btn-ghost" id="homeToggle" type="button">
+                <span id="homeToggleLabel">Hide crosshair</span>
+              </button>
+              <button class="btn btn-ghost" id="homeNextPreset" type="button">Next preset</button>
+            </div>
+          </div>
+
+          <div class="card home-presets-card">
+            <div class="section-title">
+              <span>Quick presets</span>
+              <span class="section-note" id="homePresetCount">0</span>
+            </div>
+            <div class="quick-presets" id="homeQuickPresets"></div>
+            <button class="btn btn-ghost home-goto" data-goto="presets" type="button">Manage presets</button>
+          </div>
+
+          <div class="card home-status-card">
+            <div class="section-title"><span>Status</span></div>
+            <div class="status-grid">
+              <div class="status-cell">
+                <span class="status-label">Shape</span>
+                <span class="status-value" id="homeShapeName">classic</span>
+              </div>
+              <div class="status-cell">
+                <span class="status-label">Mode</span>
+                <span class="status-value" id="homeMode">Built-in</span>
+              </div>
+              <div class="status-cell">
+                <span class="status-label">Color</span>
+                <span class="status-value">
+                  <span class="status-swatch" id="homeColorSwatch"></span>
+                  <span id="homeColorHex">#00FF88</span>
+                </span>
+              </div>
+              <div class="status-cell">
+                <span class="status-label">Outline</span>
+                <span class="status-value" id="homeOutline">On</span>
+              </div>
+              <div class="status-cell">
+                <span class="status-label">Thickness</span>
+                <span class="status-value" id="homeThickness">2 px</span>
+              </div>
+              <div class="status-cell">
+                <span class="status-label">Gap</span>
+                <span class="status-value" id="homeGap">6 px</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card home-hotkeys-card">
+            <div class="section-title">
+              <span>Hotkeys</span>
+              <span class="section-note">Global</span>
+            </div>
+            <div class="home-hotkey-list" id="homeHotkeys"></div>
+            <button class="btn btn-ghost home-goto" data-goto="hotkeys" type="button">Customize hotkeys</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SHAPE -->
+      <section class="tab-panel" data-panel="shape">
+        <header class="panel-header">
+          <div>
+            <h2>Shape</h2>
+            <p>Pick a starting crosshair or build your own in the Pixel tab.</p>
+          </div>
+          <span class="section-note" id="shapeCaption">Click a shape to apply it.</span>
+        </header>
+        <div class="shape-grid" id="shapeGrid"></div>
+      </section>
+
+      <!-- PIXEL -->
+      <section class="tab-panel" data-panel="pixel">
+        <header class="panel-header">
+          <div>
+            <h2>Pixel Editor</h2>
+            <p>Click to draw. Shift-click or right-click to erase.</p>
+          </div>
+        </header>
+
+        <div class="pixel-layout">
+          <div class="pixel-wrap">
+            <canvas class="pixel-canvas" id="pixelCanvas"></canvas>
+          </div>
+
+          <div class="pixel-controls">
+            <div class="card">
+              <div class="section-title">
+                <span>Canvas</span>
+                <span class="section-note">grid</span>
+              </div>
+
+              <div class="control-group">
+                <label>Canvas size</label>
+                <select id="pixelSize">
+                  <option value="16">16 × 16</option>
+                  <option value="24">24 × 24</option>
+                  <option value="32" selected>32 × 32</option>
+                  <option value="48">48 × 48</option>
+                  <option value="64">64 × 64</option>
+                </select>
+              </div>
+
+              <div class="control-group" style="margin-top: 12px;">
+                <label>Brush <span class="muted" id="brushVal">1</span></label>
+                <input class="range" type="range" id="brushSize" min="1" max="6" step="1" value="1" />
+              </div>
+
+              <div class="control-group" style="margin-top: 12px;">
+                <label>Symmetry</label>
+                <div class="segmented" id="symmetryGroup">
+                  <button data-sym="none" type="button">None</button>
+                  <button data-sym="h" type="button">↔</button>
+                  <button data-sym="v" type="button">↕</button>
+                  <button data-sym="quad" class="active" type="button">Quad</button>
+                </div>
+              </div>
+
+              <div class="control-group" style="margin-top: 12px;">
+                <label>Pixel size <span class="muted" id="pixelScaleVal">2px</span></label>
+                <input class="range" type="range" id="pixelScale" min="1" max="8" step="1" value="2" />
+              </div>
+            </div>
+
+            <div class="pixel-actions">
+              <button class="btn btn-ghost" id="pixelClear" type="button">Clear</button>
+              <button class="btn btn-ghost" id="pixelInvert" type="button">Invert</button>
+              <button class="btn btn-primary" id="pixelApply" type="button">Use as crosshair</button>
+            </div>
+
+            <p class="pixel-hint">Pixels render at the crosshair center. Adjust <strong>Pixel size</strong> to scale.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRESETS -->
+      <section class="tab-panel" data-panel="presets">
+        <header class="panel-header">
+          <div>
+            <h2>Presets</h2>
+            <p>Save, load, and share your crosshair configs.</p>
+          </div>
+          <span class="section-note">Quick styles</span>
+        </header>
+
+        <div class="preset-block">
+          <div class="card">
+            <div class="section-title">
+              <span>Library</span>
+              <span class="section-note">JSON</span>
+            </div>
+
+            <div class="preset-row">
+              <select id="presetSelect"></select>
+              <button class="btn btn-ghost" id="presetLoad" type="button">Load</button>
+              <button class="btn btn-ghost danger" id="presetDelete" type="button">Delete</button>
+            </div>
+
+            <div class="preset-row">
+              <input type="text" id="presetName" placeholder="New preset name…" />
+              <button class="btn btn-primary" id="presetSave" type="button">Save</button>
+            </div>
+
+            <div class="import-export">
+              <button class="btn btn-ghost" id="presetExport" type="button">Export to file</button>
+              <button class="btn btn-ghost" id="presetImport" type="button">Import from file</button>
+            </div>
+
+            <div class="preset-hint">
+              Cycle presets with <kbd>Alt</kbd>+<kbd>←</kbd> / <kbd>Alt</kbd>+<kbd>→</kbd>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- APPEARANCE -->
+      <section class="tab-panel" data-panel="appearance">
+        <header class="panel-header">
+          <div>
+            <h2>Appearance</h2>
+            <p>Fine-tune colors, weight, and size.</p>
+          </div>
+          <span class="section-note">px</span>
+        </header>
+
+        <div class="appearance-grid">
+          <div class="card">
+            <div class="section-title">
+              <span>Color</span>
+              <span class="section-note" id="colorHex">#00FF88</span>
+            </div>
+            <div class="color-grid">
+              <div class="color-cell">
+                <label>Bars</label>
+                <input type="color" id="color" value="#00ff88" />
+              </div>
+              <div class="color-cell">
+                <label>Dot</label>
+                <input type="color" id="dotColor" value="#00ff88" />
+              </div>
+              <div class="color-cell">
+                <label>Outline</label>
+                <input type="color" id="outlineColor" value="#000000" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title"><span>Geometry</span><span class="section-note">px</span></div>
+
+            <div class="control">
+              <div class="control-head">
+                <span class="control-name">Thickness</span>
+                <span class="control-value" id="thicknessVal">2px</span>
+              </div>
+              <input class="range" type="range" id="thickness" min="1" max="10" step="1" value="2" />
+            </div>
+
+            <div class="control">
+              <div class="control-head">
+                <span class="control-name">Gap</span>
+                <span class="control-value" id="gapVal">6px</span>
+              </div>
+              <input class="range" type="range" id="gap" min="0" max="30" step="1" value="6" />
+            </div>
+
+            <div class="control">
+              <div class="control-head">
+                <span class="control-name">Length</span>
+                <span class="control-value" id="lengthVal">12px</span>
+              </div>
+              <input class="range" type="range" id="length" min="2" max="40" step="1" value="12" />
+            </div>
+
+            <div class="control">
+              <div class="control-head">
+                <span class="control-name">Outline opacity</span>
+                <span class="control-value" id="outlineOpacityVal">75%</span>
+              </div>
+              <input class="range" type="range" id="outlineOpacity" min="0" max="1" step="0.05" value="0.75" />
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title"><span>Elements</span></div>
+            <label class="switch-row">
+              <span class="switch-copy">
+                <span class="switch-title">Outline</span>
+                <span class="switch-sub">Contrast outline pass</span>
+              </span>
+              <input type="checkbox" id="outline" checked />
+              <span class="switch"></span>
+            </label>
+          </div>
+        </div>
+      </section>
+      <!-- BEHAVIOR -->
+      <section class="tab-panel" data-panel="behavior">
+        <header class="panel-header">
+          <div>
+            <h2>Behavior</h2>
+            <p>How the crosshair reacts to input. Stored per preset.</p>
+          </div>
+          <span class="section-note" id="reactivePresetLabel">Unsaved</span>
+        </header>
+
+        <div class="appearance-grid">
+
+          <div class="card">
+            <div class="section-title"><span>Reactive crosshair</span></div>
+
+            <label class="switch-row">
+              <span class="switch-copy">
+                <span class="switch-title">Enable reactive</span>
+                <span class="switch-sub">Expand the crosshair on fire and movement</span>
+              </span>
+              <input type="checkbox" id="reactiveEnabled" checked />
+              <span class="switch"></span>
+            </label>
+          </div>
+
+          <div class="card" id="reactiveDetailCard">
+            <div class="section-title"><span>Spread</span><span class="section-note">px</span></div>
+
+            <div class="control">
+              <div class="control-head">
+                <span class="control-name">Fire spread</span>
+                <span class="control-value" id="fireSpreadVal">20 px</span>
+              </div>
+              <input class="range" type="range" id="fireSpread" min="0" max="80" step="1" value="20" />
+            </div>
+
+            <div class="control">
+              <div class="control-head">
+                <span class="control-name">Move spread</span>
+                <span class="control-value" id="moveSpreadVal">10 px</span>
+              </div>
+              <input class="range" type="range" id="moveSpread" min="0" max="80" step="1" value="10" />
+            </div>
+
+            <div class="control">
+              <div class="control-head">
+                <span class="control-name">Sensitivity</span>
+                <span class="control-value" id="sensitivityVal">25%</span>
+              </div>
+              <input class="range" type="range" id="sensitivity" min="5" max="100" step="1" value="25" />
+              <p class="pixel-hint" style="margin-top: 8px;">Lower = smoother transition. Higher = snappier.</p>
+            </div>
+
+            <div class="control-group" style="margin-top: 14px;">
+              <label>Combine mode</label>
+              <div class="segmented" id="combineGroup">
+                <button data-combine="add" class="active" type="button">Add</button>
+                <button data-combine="max" type="button">Max</button>
+              </div>
+              <p class="pixel-hint" style="margin-top: 8px;">Add stacks fire + move. Max uses whichever is larger.</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <span>Copy to presets</span>
+              <span class="section-note">Reactive only</span>
+            </div>
+
+            <p class="pixel-hint" style="margin: 0 0 12px 0;">
+              Copies the reactive config above to other presets. Useful if you want the same feel across all your loadouts.
+            </p>
+
+            <div class="preset-row">
+              <select id="reactiveCopyTarget"></select>
+              <button class="btn btn-ghost" id="reactiveCopyOne" type="button">Copy to this preset</button>
+            </div>
+
+            <div class="import-export" style="margin-top: 12px;">
+              <button class="btn btn-primary" id="reactiveCopyAll" type="button">Copy to all presets</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title"><span>Reset</span></div>
+            <button class="btn btn-ghost" id="reactiveReset" type="button">Reset reactive to defaults</button>
+          </div>
+
+        </div>
+      </section>
+      <!-- AMMO -->
+      <section class="tab-panel" data-panel="ammo">
+        <header class="panel-header">
+          <div>
+            <h2>Ammo Counter</h2>
+            <p>Reads numbers from your screen via OCR and displays them next to the crosshair.</p>
+          </div>
+          <span class="section-note" id="ammoStatus">Idle</span>
+        </header>
+
+        <div class="appearance-grid">
+
+          <div class="card">
+            <div class="section-title"><span>Status</span></div>
+            <label class="switch-row">
+              <span class="switch-copy">
+                <span class="switch-title">Enable ammo counter</span>
+                <span class="switch-sub">OCR scan the screen continuously</span>
+              </span>
+              <input type="checkbox" id="ammoEnabled" />
+              <span class="switch"></span>
+            </label>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <span>Game preset</span>
+              <span class="section-note" id="ammoGameLabel">Valorant</span>
+            </div>
+
+            <div class="control-group">
+              <label>Select game</label>
+              <select id="ammoGame"></select>
+            </div>
+
+            <p class="pixel-hint" id="ammoGameDesc" style="margin-top: 12px;">
+              Tuned for Valorant's bottom-right ammo display.
+            </p>
+
+            <div class="preset-row" style="margin-top: 14px;">
+              <button class="btn btn-ghost" id="ammoTestBtn" type="button">Test read</button>
+              <button class="btn btn-primary" id="ammoDebugBtn" type="button">Show OCR preview</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <span>Manual tuning</span>
+              <span class="section-note">Custom only</span>
+            </div>
+
+            <label class="switch-row">
+              <span class="switch-copy">
+                <span class="switch-title">Use custom tuning</span>
+                <span class="switch-sub">Override the game preset</span>
+              </span>
+              <input type="checkbox" id="ammoUseCustom" />
+              <span class="switch"></span>
+            </label>
+
+            <div id="ammoCustomSection" class="custom-ammo-section">
+              <div class="control-group" style="margin-top: 12px;">
+                <label>Scan region</label>
+                <select id="ammoRegion">
+                  <option value="bottom-right">Bottom-right</option>
+                  <option value="bottom-center">Bottom-center</option>
+                  <option value="bottom-left">Bottom-left</option>
+                  <option value="whole-bottom">Whole bottom half</option>
+                </select>
+              </div>
+
+              <div class="control-group" style="margin-top: 12px;">
+                <label>Background</label>
+                <select id="ammoBg">
+                  <option value="dark-bg">Dark background</option>
+                  <option value="light-bg">Light background</option>
+                </select>
+              </div>
+
+              <div class="control">
+                <div class="control-head">
+                  <span class="control-name">Threshold</span>
+                  <span class="control-value" id="ammoThresholdVal">150</span>
+                </div>
+                <input class="range" type="range" id="ammoThreshold" min="50" max="220" step="5" value="150" />
+              </div>
+
+              <div class="control">
+                <div class="control-head">
+                  <span class="control-name">Min digit height</span>
+                  <span class="control-value" id="ammoMinHeightVal">18 px</span>
+                </div>
+                <input class="range" type="range" id="ammoMinHeight" min="8" max="60" step="2" value="18" />
+              </div>
+
+              <div class="control">
+                <div class="control-head">
+                  <span class="control-name">Scan interval</span>
+                  <span class="control-value" id="ammoIntervalVal">500 ms</span>
+                </div>
+                <input class="range" type="range" id="ammoInterval" min="200" max="2000" step="100" value="500" />
+              </div>
+
+              <label class="switch-row" style="margin-top: 12px;">
+                <span class="switch-copy">
+                  <span class="switch-title">Expect slash (N/N)</span>
+                  <span class="switch-sub">Whitelist slash character</span>
+                </span>
+                <input type="checkbox" id="ammoSlash" />
+                <span class="switch"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <span>Live debug</span>
+              <span class="section-note" id="ammoDebugTime">—</span>
+            </div>
+
+            <div class="ammo-debug">
+              <div class="ammo-debug-left">
+                <div class="ammo-debug-preview" id="ammoDebugPreview">
+                  <div class="ammo-debug-preview-empty">Test read to see preview</div>
+                </div>
+              </div>
+
+              <div class="ammo-debug-right">
+                <div class="status-cell">
+                  <span class="status-label">Detected</span>
+                  <span class="status-value" id="ammoDetected">—</span>
+                </div>
+                <div class="status-cell">
+                  <span class="status-label">Confidence</span>
+                  <span class="status-value" id="ammoConfidence">—</span>
+                </div>
+                <div class="status-cell">
+                  <span class="status-label">Raw reads</span>
+                  <span class="status-value" id="ammoRawReads">—</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title"><span>Override</span></div>
+            <div class="preset-row">
+              <input type="text" id="ammoOverride" placeholder="Type value or leave empty" />
+              <button class="btn btn-primary" id="ammoOverrideSet" type="button">Set</button>
+              <button class="btn btn-ghost" id="ammoOverrideClear" type="button">Clear</button>
+            </div>
+            <p class="pixel-hint" style="margin-top: 10px;">
+              When set, this value is shown instead of OCR. Useful if OCR doesn't work for your game.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="section-title"><span>Display</span></div>
+
+            <div class="color-grid">
+              <div class="color-cell">
+                <label>Color</label>
+                <input type="color" id="ammoColor" value="#00ff88" />
+              </div>
+              <div class="color-cell">
+                <label>Position</label>
+                <select id="ammoPosition" style="margin-top: 6px;">
+                  <option value="right">Right</option>
+                  <option value="left">Left</option>
+                  <option value="above">Above</option>
+                  <option value="below">Below</option>
+                </select>
+              </div>
+              <div class="color-cell">
+                <label>Show / max</label>
+                <div style="margin-top: 8px;">
+                  <input type="checkbox" id="ammoShowMax" checked />
+                </div>
+              </div>
+            </div>
+
+            <div class="control">
+              <div class="control-head">
+                <span class="control-name">Max ammo</span>
+                <span class="control-value" id="ammoMaxVal">30</span>
+              </div>
+              <input class="range" type="range" id="ammoMax" min="1" max="999" step="1" value="30" />
+            </div>
+
+            <div class="control">
+              <div class="control-head">
+                <span class="control-name">Font size</span>
+                <span class="control-value" id="ammoSizeVal">16 px</span>
+              </div>
+              <input class="range" type="range" id="ammoSize" min="10" max="48" step="1" value="16" />
+            </div>
+
+            <div class="control">
+              <div class="control-head">
+                <span class="control-name">Offset X</span>
+                <span class="control-value" id="ammoOffsetXVal">40 px</span>
+              </div>
+              <input class="range" type="range" id="ammoOffsetX" min="-400" max="400" step="2" value="40" />
+            </div>
+
+            <div class="control">
+              <div class="control-head">
+                <span class="control-name">Offset Y</span>
+                <span class="control-value" id="ammoOffsetYVal">0 px</span>
+              </div>
+              <input class="range" type="range" id="ammoOffsetY" min="-400" max="400" step="2" value="0" />
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- HOTKEYS -->
+      <section class="tab-panel" data-panel="hotkeys">
+        <header class="panel-header">
+          <div>
+            <h2>Hotkeys</h2>
+            <p>Click a shortcut box and press the keys you want.</p>
+          </div>
+        </header>
+
+        <div class="card">
+          <div class="hotkeys-list" id="hotkeysList"></div>
+          <div class="hotkeys-footer">
+            <button class="btn btn-ghost" id="hotkeysReset" type="button">Reset to defaults</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <div class="toast" id="toast">
+    <span class="toast-icon">✓</span>
+    <span id="toastText">Ready</span>
+  </div>
+
+  <script src="pixel-editor.js"></script>
+  <script src="settings.js"></script>
+</body>
+</html>

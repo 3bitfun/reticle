@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Reticle OCR</title>
+  <style>
+    html, body { margin: 0; background: #000; overflow: hidden; }
+    canvas { display: none; }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script>
+    const { ipcRenderer } = require('electron');
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    let workerPromise = null;
+
+    function getWorker() {
+      if (!workerPromise) {
+        workerPromise = Tesseract.createWorker('eng').then(async (worker) => {
+          await worker.setParameters({
+            tessedit_pageseg_mode: '11', // sparse text
+            preserve_interword_spaces: '1',
+          });
+          return worker;
+        });
+      }
+      return workerPromise;
+    }
+
+    // Warm up the worker immediately
+    getWorker().catch((e) => console.error('OCR worker init failed', e));
+
+    ipcRenderer.on('ocr-scan', async (_e, { seq, image, config }) => {
+      try {
+        const result = await processScan(image, config);
+        ipcRenderer.send('ocr-result', { seq, ...result });
+      } catch (err) {
+        ipcRenderer.send('ocr-result', {
+          seq,
+          numbers: [],
+          error: String(err && err.message ? err.message : err),
+        });
+      }
+    });
+
+    async function processScan(dataUrl, config) {
+      const img = await loadImage(dataUrl);
+      const region = getRegion(config.region, img.width, img.height);
+
+      canvas.width = region.w;
+      canvas.height = region.h;
+      ctx.drawImage(
+        img,
+        region.x, region.y, region.w, region.h,
+        0, 0, region.w, region.h
+      );
+
+      // Grayscale + threshold
+      const imageData = ctx.getImageData(0, 0, region.w, region.h);
+      const data = imageData.data;
+      const threshold = config.thresholdValue || 150;
+      const invert = config.thresholdMode === 'light-bg';
+
+      for (let i = 0; i < data.length; i += 4) {
+        const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+        let v = gray > threshold ? 255 : 0;
+        if (invert) v = 255 - v;
+        data[i] = data[i + 1] = data[i + 2] = v;
+        data[i + 3] = 255;
+      }
+      ctx.putImageData(imageData, 0, 0);
+
+      // Optional: upscale 2x for better OCR
+      const upscaled = document.createElement('canvas');
+      upscaled.width = region.w * 2;
+      upscaled.height = region.h * 2;
+      const upCtx = upscaled.getContext('2d');
+      upCtx.imageSmoothingEnabled = false;
+      upCtx.drawImage(canvas, 0, 0, upscaled.width, upscaled.height);
+
+      const processedImage = upscaled.toDataURL();
+
+      // Configure whitelist for this scan
+      const worker = await getWorker();
+      const whitelist = config.digitsOnly === false
+        ? ''
+        : (config.expectSlash ? '0123456789/' : '0123456789');
+      await worker.setParameters({ tessedit_char_whitelist: whitelist });
+
+      const { data: result } = await worker.recognize(processedImage);
+      const numbers = extractNumbers(result, region.w, region.h);
+
+      return { numbers, processedImage, region };
+    }
+
+    function extractNumbers(result, cropW, cropH) {
+      const numbers = [];
+
+      // Preferred: word-level bounding boxes
+      const words = (result && result.words) || [];
+      if (Array.isArray(words) && words.length) {
+        for (const w of words) {
+          const text = (w.text || '').trim();
+          if (!/[0-9]/.test(text)) continue;
+          const bbox = w.bbox || {};
+          numbers.push({
+            text,
+            confidence: w.confidence || 0,
+            x: bbox.x0 || 0,
+            y: bbox.y0 || 0,
+            width: (bbox.x1 || 0) - (bbox.x0 || 0),
+            height: (bbox.y1 || 0) - (bbox.y0 || 0),
+          });
+        }
+        return numbers;
+      }
+
+      // Fallback: parse text only, split by whitespace
+      const text = (result && result.text) || '';
+      const overallConf = (result && result.confidence) || 0;
+      const tokens = text.split(/\s+/).filter((t) => /\d/.test(t));
+      for (const token of tokens) {
+        numbers.push({
+          text: token,
+          confidence: overallConf,
+          x: 0,
+          y: 0,
+          width: cropW,
+          height: cropH,
+        });
+      }
+      return numbers;
+    }
+
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+
+    function getRegion(name, w, h) {
+      switch (name) {
+        case 'bottom-right':
+          return {
+            x: Math.round(w * 0.55),
+            y: Math.round(h * 0.65),
+            w: Math.round(w * 0.45),
+            h: Math.round(h * 0.35),
+          };
+        case 'bottom-center':
+          return {
+            x: Math.round(w * 0.30),
+            y: Math.round(h * 0.65),
+            w: Math.round(w * 0.40),
+            h: Math.round(h * 0.35),
+          };
+        case 'bottom-left':
+          return {
+            x: 0,
+            y: Math.round(h * 0.65),
+            w: Math.round(w * 0.45),
+            h: Math.round(h * 0.35),
+          };
+        case 'whole-bottom':
+        default:
+          return {
+            x: 0,
+            y: Math.round(h * 0.50),
+            w,
+            h: Math.round(h * 0.50),
+          };
+      }
+    }
+  </script>
+</body>
+</html>
